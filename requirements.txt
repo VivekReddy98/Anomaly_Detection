@@ -2,5 +2,4 @@ networkx
 numpy
 pandas
 scipy
-graphframes
-pyspark
+sklearn

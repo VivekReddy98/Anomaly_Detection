@@ -1,65 +1,55 @@
 import scipy, math
 from scipy import sparse
 import numpy as np
-from pyspark import SparkContext, Row
-from pyspark.sql import SQLContext
-from pyspark.sql.functions import * 
-from pyspark.sql.types import *
-from graphframes import *
+import networkx as nx
+from sklearn.metrics.pairwise import pairwise_distances 
 from random import shuffle
-from Utils.GraphFrameGenerator import GraphFrameGenerator
+from scipy.spatial.distance import cdist
+from scipy.sparse.linalg import inv
+import time
+from Utils.GenerateGraphMatrices import GenerateGraphMatrices
 
-class DeltaCon(): #GraphFrameGenerator
-	def __init__(self): #SparkContextObj, SQLContextObj):
-		#self.sc = SparkContextObj
-		#self.sql = SQLContextObj
-		#self.has_vertices_created = False
-		pass
+class DeltaCon():
+	def __init__(self, epsilon):
+		self.epsilon = epsilon 
 
-	def __getGroup(self, g, num_vertices):
-		self.verticesGroup = {} 
-		vertices = [i for i in range(0,num_vertices)]
-		shuffle(vertices)
-		if g>num_vertices:
-			raise Exception("g cannot be greater than num_vertices")		
-		chunk_size = int(math.ceil(num_vertices/g))
-		#print(chunk_size)
-		self.group_num = 0
-		i = 0
-		while self.group_num<g:
-			if i+chunk_size<num_vertices:
-				yield vertices[i:i+chunk_size]
-				i = i+chunk_size
-				self.verticesGroup[self.group_num] =  vertices[i:i+chunk_size]
-				self.group_num = self.group_num+1
-			else:
-				yield vertices[i:num_vertices]
-				self.verticesGroup[self.group_num] =  vertices[i:num_vertices]
-				self.group_num = self.group_num+1
-		yield None
-		print("Thats all i have, hav fun")
+	def ComputeAffinityMatrix(self, I, D, A, S):
+		D.data = D.data*(self.epsilon**2)
+		A.data = A.data*self.epsilon
+		Left_operand = I + D - A
+		Left_operand_inv = inv(Left_operand)
+		AffinityMatrix = Left_operand_inv.dot(S)
+		return AffinityMatrix
 
+def RootED(AM1, AM2):
+	AM1.data = np.sqrt(AM1.data)
+	AM2.data = np.sqrt(AM2.data)
+	Result = AM1-AM2
+	d = np.sqrt(np.sum(np.square(Result.data)))
+	return d
 
-	def GenSeedScoresMatrix(self, g, num_vertices):
-		Ei = np.zeros((num_vertices, g))
-		itr = self.__getGroup(g, num_vertices)
-		list_vertices = next(itr)
-		while list_vertices!=None:
-			print(list_vertices, self.group_num)
-			Ei[list_vertices,self.group_num] = 1
-			list_vertices = next(itr)
-		return sparse.csc_matrix(Ei)
-
+def Similarity(d):
+	return (1/(1+d))
 
 ## Testing this class
 if __name__ == '__main__':
-	#sc=SparkContext("local", "degree.py")
-	#sqlContext = SQLContext(sc)
-	#sqlContext.sql("set spark.sql.shuffle.partitions=2")
-	#sc.setLogLevel("WARN")
-	G = DeltaCon()
-	print(G.GenSeedScoresMatrix(12, 12).todense())
- 
+	Delta = DeltaCon(0.5)
+	
+	start = time.time()
+	G = GenerateGraphMatrices(30)
+	I1, S1, A1, D1 = G.GenerateGraphObj(EdgeFilePath="datasets/autonomous/1_autonomous.txt")
+	AM1 = Delta.ComputeAffinityMatrix(I1, D1, A1, S1)
+	print((time.time()-start))
+
+
+
+	G = GenerateGraphMatrices(30)
+	I2, S2, A2, D2 = G.GenerateGraphObj(EdgeFilePath="datasets/autonomous/2_autonomous.txt")
+	AM2 = Delta.ComputeAffinityMatrix(I2, D2, A2, S2)
+
+	print(np.sum(A1), np.sum(A2), np.sum(D1), np.sum(D2), np.sum(AM1), np.sum(AM2))
+
+	print(Similarity(RootED(AM1,AM2)))
 
 
 
