@@ -1,0 +1,12 @@
+ 
+#datasets
+datasets/
+
+#venv
+venv/
+
+#Graphframes Jar
+*.jar
+
+#Py cache
+*.pyc
