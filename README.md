@@ -1,4 +1,4 @@
-# Anomaly Detection
+# Anomaly Detection in Time Varying Graphs
 A course project for CSC 591 Graph Data Mining at NC State University.
 
 ## Project Setup Guide:
