@@ -18,6 +18,7 @@ class DeltaCon():
 		A.data = A.data*self.epsilon
 		Left_operand = I + D - A
 		AffinityMatrix = spsolve(Left_operand, S)
+		print(np.sum(AffinityMatrix.data), np.sum(S.data))
 		return AffinityMatrix
 
 def Similarity(AM1, AM2):

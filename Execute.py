@@ -3,9 +3,9 @@ from Utils.DeltaCon import DeltaCon
 import scipy, math
 from scipy import sparse
 import numpy as np
-import os
+import os, json
 from copy import deepcopy
-
+import sys, ast
 
 def Parse(list_files):
 	new = {}
@@ -24,9 +24,10 @@ def GiveAffinity(EdgeFilePath, g, epsilon):
 	return D.ComputeAffinityMatrix(I1, D1, A1, S1)
 
 def Similarity(AM1, AM2):
-	A1 = AM1.todense()
-	A2 = AM2.todense()
-	d = np.sqrt(np.sum(np.square(np.sqrt(A1)-np.sqrt(A2))))
+	AM1.data = np.sqrt(AM1.data)
+	AM2.data = np.sqrt(AM2.data)
+	Result = AM1-AM2
+	d = np.sqrt(np.sum(np.square(Result.data)))
 	return (1/(1+d))
 
 def compute_similarity(list_files, dict_files, dataset, g, epsilon, results_dir):
@@ -38,12 +39,11 @@ def compute_similarity(list_files, dict_files, dataset, g, epsilon, results_dir)
 				first_computed = True
 			else:
 				AM_old = AM_new
-			#AM_old = GiveAffinity(EdgeFilePath="datasets/{}/{}".format(dataset, dict_files[list_files[i]]), g=g, epsilon=epsilon)
 			AM_new = GiveAffinity(EdgeFilePath="datasets/{}/{}".format(dataset, dict_files[list_files[i+1]]), g=g, epsilon=epsilon)
 			sim_score = Similarity(AM_old, deepcopy(AM_new))
 			f.write(str(sim_score))
 			f.write("\n")
-			print(dict_files[list_files[i]], np.sum(AM_old.data), dict_files[list_files[i+1]], np.sum(AM_new.data), sim_score)
+			print(dict_files[list_files[i]], dict_files[list_files[i+1]], round(sim_score,5))
 	print("The scores have been documented")
 	return None 
 
@@ -52,13 +52,14 @@ if __name__ == '__main__':
 	data_dir = "/datasets/"
 	results_dir = "results/"
 	datasets = os.listdir(os.getcwd()+data_dir)
-	g_epsilon = {'autonomous':[500,0.99], 'enron_by_day':[20,0.99],'p2p-Gnutella':[1000,0.99], 'voices':[20, 0.99]} 
-	for dataset in datasets:
+	with open("search_space_hyper_param.json") as f:
+		hyper_param = json.load(f) 
+	dataset = str(sys.argv[1])
+	for param in ast.literal_eval(hyper_param[dataset]['node']):
 		src_path = os.getcwd()+data_dir+dataset+"/"
 		dict_files = Parse(os.listdir(src_path))
 		list_files = list(dict_files.keys())
 		list_files.sort()
-		#print(list_files)
-		compute_similarity(list_files, dict_files, dataset, g_epsilon[dataset][0], g_epsilon[dataset][1], results_dir)
+		compute_similarity(list_files, dict_files, dataset, param[0], param[1], results_dir)
 
 	
