@@ -1,2 +1,3 @@
 It took 0 seconds to complete the dataset enron_by_day on the complete search space provided in the json file
 It took 92 seconds to complete the dataset enron_by_day on the complete search space provided in the json file
+It took 5034 seconds to complete the dataset autonomous on the complete search space provided in the json file
