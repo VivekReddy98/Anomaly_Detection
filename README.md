@@ -19,6 +19,10 @@ Note: Edit the set_up.sh to match the paths on your machine. (nano set_up.sh)
 
 ### Copy datasets folder into the project directory
 
+### Source Code Walkthrough
+1) DeltaCon and GenerateGraphMatrices are two important classes implemented and packaged under the utils directory.
+2) Similarity, Moving Average and other trivial functions have been implemneted in anomaly.py script
+
 ### Steps to execute the code.
 1) Use python anomaly.py "dataset_name"
 2) To edit the hyperparams open the search_hyper_param.json and edit the params of the dataset you want to.
