@@ -25,4 +25,4 @@ Note: Edit the set_up.sh to match the paths on your machine. (nano set_up.sh)
 3) Similarity Scores will be writen to results/dataset/* folder under the name time_series_g_epsilon.txt.
 4) Anomalous Similarities and Anomalous Timestamps are also stored in the same folder.
 5) As per the requirements time series data in also outputted by the name "dataset_time_series.txt" in the project root directory.
-
+6) The Plots of Similarity Scores vs Time-Stamp has been documented in P4_report
