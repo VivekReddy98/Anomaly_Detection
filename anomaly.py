@@ -86,7 +86,6 @@ def find_anomalies(results_dir, dataset, g, epsilon):
 	return None
 
 
-## Testing this class
 if __name__ == '__main__':	
 	data_dir = "/datasets/"
 	results_dir = "results/"
@@ -99,7 +98,7 @@ if __name__ == '__main__':
 		dict_files = Parse(os.listdir(src_path))
 		list_files = list(dict_files.keys())
 		list_files.sort()
-		#compute_similarity(list_files, dict_files, dataset, param[0], param[1], results_dir)
+		compute_similarity(list_files, dict_files, dataset, param[0], param[1], results_dir)
 		find_anomalies(results_dir, dataset, param[0], param[1])
 
 	
