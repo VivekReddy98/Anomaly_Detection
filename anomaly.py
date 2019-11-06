@@ -10,11 +10,11 @@ import sys, ast, time
 def Moving_Range_Mean(lis):
     l = lis.shape[0]
     arr = lis - np.roll(lis, -1)
-    return np.nansum(np.absolute(arr[1:-1]))/(l-1)
+    return np.sum(np.absolute(arr[1:-1]))/(l-1)
 
 def give_stats(lis):
     mean_ = Moving_Range_Mean(lis)
-    median_ = np.nanmedian(lis)
+    median_ = np.median(lis)
     upper_t = median_ + 3*mean_
     lower_t = median_ - 3*mean_
     return mean_, median_, lower_t, upper_t
@@ -61,22 +61,27 @@ def compute_similarity(list_files, dict_files, dataset, g, epsilon, results_dir)
 	print("The scores have been documented")
 	return None 
 
-def find_anomalies(results_dir, dataset, param[0], param[1]):
+def find_anomalies(results_dir, dataset, g, epsilon):
 	path = results_dir+dataset+"/"+"time_series"+"_"+str(g)+"_"+str(round(epsilon,2))+".txt"
 	time_series = np.loadtxt(path)
 	mean_, median_, lower_t, upper_t = give_stats(time_series)
+	print(lower_t)
 	anomalous_similarities = []
 	with open(results_dir+dataset+"/"+"anomalous_similarities"+"_"+str(g)+"_"+str(round(epsilon,2))+".txt", "w+") as f:
 		for i in range(0, time_series.shape[0]):
-			if time_series[i] < lower_t:
+			if time_series[i] <= lower_t:
 				anomalous_similarities.append(i)
-				f.write(str(anomalous_similarities))
+				f.write(str(i))
 				f.write("\n")
+		if anomalous_similarities == []:
+			f.write("No Anomalies have been found")
 	with open(results_dir+dataset+"/"+"anomalous_time_stamp"+"_"+str(g)+"_"+str(round(epsilon,2))+".txt", "w+") as f:
 		for i in range(1, len(anomalous_similarities)):
 			if anomalous_similarities[i]-anomalous_similarities[i-1] == 1:
 				f.write(str(anomalous_similarities[i]))
 				f.write("\n")
+		if anomalous_similarities == []:
+			f.write("No Anomalies have been found")
 	print("Anomalies written to the results folder ")
 	return None
 
@@ -94,7 +99,7 @@ if __name__ == '__main__':
 		dict_files = Parse(os.listdir(src_path))
 		list_files = list(dict_files.keys())
 		list_files.sort()
-		compute_similarity(list_files, dict_files, dataset, param[0], param[1], results_dir)
+		#compute_similarity(list_files, dict_files, dataset, param[0], param[1], results_dir)
 		find_anomalies(results_dir, dataset, param[0], param[1])
 
 	
