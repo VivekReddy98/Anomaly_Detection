@@ -5,6 +5,9 @@ datasets/
 #venv
 venv/
 
+#log
+logs/
+
 #ipynb Checkpoints
 .ipynb_checkpoints/
 
